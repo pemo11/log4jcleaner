@@ -1,11 +1,16 @@
 <#
   .Synopsis
-  Kritische class-Datei aus Log4j package Datei enfernen
+  Removes the critical JndiLookup.class from a jar file 
   .Notes
-  Besser ist es, Dlog4j2.formatMsgNoLookups=True zu setzen
+  This script is only for experimental purpose and a kind of case study
+  The recommended action is either setting Dlog4j2.formatMsgNoLookups=True or update to version > 2.1.15
   Last Update: 12/24/21
-  #>
+#>
 
+<#
+  .Synopsis
+  Writes a formatted line of text to a log file
+#>
 function Write-Log
 {
   param([String]$Message)
@@ -14,6 +19,10 @@ function Write-Log
   Add-Content -Path $LogPath -Value $Message -Encoding Default -WhatIf:$false
 }
 
+<#
+  .Synopsis
+  Removes the JndiLookup.class from a jar file that meets the version criteria
+#>
 function Remove-Log4JClass
 {
     [CmdletBinding(SupportsShouldProcess=$true)]
