@@ -29,7 +29,7 @@ I tested it on Mac OS.
 
 Feel free to adapt this script to your own needs.
 
-# self-praise;)
+** a little self-praise at the end;) **
 
 What I like most about my script is the general approach which could server as a template for other scripts:
 
