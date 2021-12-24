@@ -33,9 +33,9 @@ Feel free to adapt this script to your own needs.
 
 What I like most about my script is the general approach which could server as a template for other scripts:
 
--Provided as a psm1 file for more flexibility
--Reading parameters from a config file
--Localized messages with psd1 files
--A simple logging (without Log4j;)
--A few simple Pesters tests
--Hopefully enough comments
+- Provided as a psm1 file for more flexibility
+- Reading parameters from a config file
+- Localized messages with psd1 files
+- A simple logging (without Log4j;)
+- A few simple Pesters tests
+- Hopefully enough comments
