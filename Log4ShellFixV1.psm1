@@ -16,7 +16,7 @@ function Write-Log
   param([String]$Message)
   $LogPath = Join-Path -Path $PSScriptRoot -ChildPath ("Log4JCleanerV1_{0:dd_MM_yy}.log" -f (Get-Date))
   $Message = "*** [{0:HH:mm - dd/MM/yy}] $Message ***" -f (Get-Date)
-  Add-Content -Path $LogPath -Value $Message -Encoding Default -WhatIf:$false
+  Add-Content -Path $LogPath -Value $Message -Encoding UTF8 -WhatIf:$false
 }
 
 <#
@@ -85,8 +85,9 @@ function Remove-Log4JClass
                 Write-Log $msg7
                 Write-Verbose $msg7
                 # Put the jar file together at its original place without the forbidden file
+                # This can take a while - important: don't use -Update but -Force
                 $JarPath = $_.FullName
-                Compress-Archive -Path $tmpDir -DestinationPath $JarPath -Update
+                Compress-Archive -Path $tmpDir -DestinationPath $JarPath -Force
                 $msg8 = $MsgBinding.msg8 -f $JarPath
                 Write-Log $msg8
                 Write-Verbose $msg8
