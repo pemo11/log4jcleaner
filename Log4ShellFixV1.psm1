@@ -38,66 +38,74 @@ function Remove-Log4JClass
     }
     process
     {
-      foreach($Path in $SearchPath)
-      {
-        $msg2 = $MsgBinding.msg2 -f $Path
-        Write-Verbose -Message $msg2
-        # Check for Jar-Files in the directory provided by path
-        $JarFiles = Get-ChildItem -Path $Path/log4j-core-*.jar -File -Recurse -ErrorAction Ignore
-        # Any jar files found?
-        $JarFiles.forEach{
-          $msg3 = $MsgBinding.msg3 -f $_.Name
-          Write-Log -Message $msg3
-          # Check the jar name and get the version number
-          $Pattern = "log4j-core-([\d.]+)\.jar"
-          if ([RegEx]::Match($_.Name, $Pattern)) {
-            $Version = [Regex]::Match($_.Name, $Pattern).Groups[1].Value
-            # threat $Major/$Minor as numbers for comparison by [Int]
-            [Int]$Major = ($Version -split "\.")[0]
-            [Int]$Minor = ($Version -split "\.")[1]
-            $msg6 = $MsgBinding.msg6 -f $Version
-            Write-Log -Message  $msg6
-            # bad version?
-            if ($Major -eq 2 -and $Minor -lt 15) {
-              # create a new temp directory
-              $tmpDir = [Environment]::GetEnvironmentVariable("TMPDIR")
-              $tmpDir = Join-Path -Path $tmpDir -ChildPath "jartest"
-              # got error with mkdir on MacOS
-              New-Item -path $tmpDir -ItemType Directory -ErrorAction Ignore
-              $msg4 = $MsgBinding.msg4 -f $tmpDir
-              Write-Log -Message  $msg4
-              # clean it first if it already had existed
-              remove-item -Path $tmpDir/* -Force -Recurse
-              $msg5 = $MsgBinding.msg5 -f $_.FullName
-              Write-Log -Message $msg5
-              # expand the jar file into the temp directory
-              # Force-Parameter necessary - ignore the Failed to create file-errors
-              expand-archive -Path $_.FullName -DestinationPath $tmpDir -ErrorAction Ignore -Force
-              # Delete critical class file if no whatif or confirm:$false set
-              if ($PSCmdlet.ShouldProcess("Log4j-core.jar", "Remove"))
-              {
-                # Remove class file from temp-dictionary
-                $RemoveFileName = "org/apache/logging/log4j/core/lookup/JndiLookup.class"
-                Remove-Item -Path $tmpDir/$RemoveFileName
-                $msg7 = $MsgBinding.msg7 -f $RemoveFileName
-                Write-Log -Message $msg7
-                # Put the jar file together at its original place without the forbidden file
-                # This can take a while - important: don't use -Update but -Force
-                $JarPath = $_.FullName
-                Compress-Archive -Path $tmpDir -DestinationPath $JarPath -Force
-                $msg8 = $MsgBinding.msg8 -f $JarPath
-                Write-Log -Message $msg8
-                # Count number of fixed jars
-                $FixCounter++
+      try {
+        # Iterate to all path'es provided by the SearchPath parameter
+        foreach($Path in $SearchPath)
+        {
+          $msg2 = $MsgBinding.msg2 -f $Path
+          Write-Verbose -Message $msg2
+          # Check for Jar-Files in the directories provided by path
+          $JarFiles = Get-ChildItem -Path $Path/log4j-core-*.jar -File -Recurse -ErrorAction Ignore
+          # Any jar files found?
+          $JarFiles.forEach{
+            $msg3 = $MsgBinding.msg3 -f $_.Name
+            Write-Log -Message $msg3
+            # Check the jar name and get the version number
+            $Pattern = "log4j-core-([\d.]+)\.jar"
+            if ([RegEx]::Match($_.Name, $Pattern)) {
+              $Version = [Regex]::Match($_.Name, $Pattern).Groups[1].Value
+              # threat $Major/$Minor as numbers for comparison as [Int]
+              [Int]$Major = ($Version -split "\.")[0]
+              [Int]$Minor = ($Version -split "\.")[1]
+              $msg6 = $MsgBinding.msg6 -f $Version
+              Write-Log -Message  $msg6
+              # bad version number?
+              if ($Major -eq 2 -and $Minor -lt 15) {
+                # create a new temp directory
+                $tmpDir = [Environment]::GetEnvironmentVariable("TMPDIR")
+                $tmpDir = Join-Path -Path $tmpDir -ChildPath "jartest"
+                # got error with mkdir on MacOS
+                New-Item -path $tmpDir -ItemType Directory -ErrorAction Ignore
+                $msg4 = $MsgBinding.msg4 -f $tmpDir
+                Write-Log -Message  $msg4
+                # clean it first if it already had existed
+                remove-item -Path $tmpDir/* -Force -Recurse
+                $msg5 = $MsgBinding.msg5 -f $_.FullName
+                Write-Log -Message $msg5
+                # expand the jar file into the temp directory
+                # Force-Parameter necessary - ignore the "Failed to create file"-errors
+                expand-archive -Path $_.FullName -DestinationPath $tmpDir -ErrorAction Ignore -Force
+                # Delete critical class file if no whatif or confirm:$false set
+                if ($PSCmdlet.ShouldProcess("Log4j-core.jar", "Remove"))
+                {
+                  # Remove class file from temp-dictionary
+                  $RemoveFileName = "org/apache/logging/log4j/core/lookup/JndiLookup.class"
+                  Remove-Item -Path $tmpDir/$RemoveFileName
+                  $msg7 = $MsgBinding.msg7 -f $RemoveFileName
+                  Write-Log -Message $msg7
+                  # Put the jar file together at its original place without the forbidden file
+                  # This can take a while - important: don't use -Update but -Force
+                  $JarPath = $_.FullName
+                  Compress-Archive -Path $tmpDir -DestinationPath $JarPath -Force
+                  $msg8 = $MsgBinding.msg8 -f $JarPath
+                  Write-Log -Message $msg8
+                  # Count number of fixed jars
+                  $FixCounter++
+                }
               }
             }
           }
         }
       }
+      catch {
+        $msg10 = $MsgBinding.msg10 -f $_
+        Write-Log -Message $msg0
+        Write-Warning $msg10
+        $Result = "Error"
+      }
     }
     end
     {
-        $Result
         # correct output;)
         switch($FixCounter)
         {
@@ -106,5 +114,7 @@ function Remove-Log4JClass
           default { $msg9 = $MsgBinding.msg9 -f $FixCounter }
         }
         Write-Log -Message $msg9
+        # Only needed for pester tests - its either OK or Error
+        $Result
     }
 }

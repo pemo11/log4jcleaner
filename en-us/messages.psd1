@@ -10,4 +10,5 @@ msg8=Jar archive {0} updated
 msg9={0} Log4J jar files updated
 msg9A=No Log4J jar file updated
 msg9B=One Log4J jar file updated
+msg10=Error within try/catch ({0})
 '@
