@@ -4,7 +4,7 @@
   .Notes
   This script is only for experimental purpose and a kind of case study
   The recommended action is either setting Dlog4j2.formatMsgNoLookups=True or update to version > 2.1.15
-  Last Update: 12/24/21
+  Last Update: 12/27/21
 #>
 
 <#
