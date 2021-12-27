@@ -16,7 +16,7 @@ function Write-Log
   [CmdletBinding()]
   param([String]$Message)
   $LogPath = Join-Path -Path $PSScriptRoot -ChildPath ("Log4JCleanerV1_{0:dd_MM_yy}.log" -f (Get-Date))
-  $Message = "*** [{0:HH:mm - dd/MM/yy}] $Message ***" -f (Get-Date)
+  $Message = "*** [{1}][{0:HH:mm - dd/MM/yy}] $Message ***" -f (Get-Date), (hostname)
   Add-Content -Path $LogPath -Value $Message -Encoding UTF8 -WhatIf:$false
   Write-Verbose -Message $Message
 }
